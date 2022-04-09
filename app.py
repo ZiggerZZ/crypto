@@ -11,7 +11,9 @@ import os
 # START_TIMESTAMP = 1609459200000  # 2021-01-01 00:00
 # END_TIMESTAMP = 1640995200000  # 2021-01-01 00:00
 
-app = dash.Dash(__name__)
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+server = app.server
 
 path = r'data/'
 all_files = glob.iglob(os.path.join(path, "*.csv"))
