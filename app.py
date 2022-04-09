@@ -1,6 +1,5 @@
 import dash
 from dash import html
-import plotly.graph_objects as go
 import plotly.express as px
 from dash import dcc
 from dash.dependencies import Input, Output
@@ -9,10 +8,10 @@ from datetime import date, datetime
 import glob
 import os
 
-START_TIMESTAMP = 1609459200000  # 2021-01-01 00:00
-END_TIMESTAMP = 1640995200000  # 2021-01-01 00:00
+# START_TIMESTAMP = 1609459200000  # 2021-01-01 00:00
+# END_TIMESTAMP = 1640995200000  # 2021-01-01 00:00
 
-app = dash.Dash()
+app = dash.Dash(__name__)
 
 path = r'data/'
 all_files = glob.iglob(os.path.join(path, "*.csv"))
@@ -22,15 +21,6 @@ df = pd.concat(df_from_each_file, ignore_index=True)
 # df = df[df.unix >= START_TIMESTAMP]
 # df = df[df.unix < END_TIMESTAMP]
 
-
-
-# assume you have a "long-form" data frame
-# see https://plotly.com/python/px-arguments/ for more options
-# df = pd.DataFrame({
-#     "Fruit": ["Apples", "Oranges", "Bananas", "Apples", "Oranges", "Bananas"],
-#     "Amount": [4, 1, 2, 2, 4, 5],
-#     "City": ["SF", "SF", "SF", "Montreal", "Montreal", "Montreal"]
-# })
 
 fig = px.line(df, x="date", y="open", color="symbol")
 
@@ -62,14 +52,6 @@ app.layout = html.Div(children=[
     ),
 ])
 
-
-# @app.callback(
-#     Output('dd-output-container', 'children'),
-#     Input('demo-dropdown', 'value')
-# )
-# def update_output(value):
-#     return f'You have selected {value}'
-
 @app.callback(
     Output('graph-with-data', 'figure'),
     Input('selected-currencies', 'value'),
@@ -91,4 +73,4 @@ def update_figure(selected_currencies, start_date, end_date):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
