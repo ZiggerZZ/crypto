@@ -129,13 +129,13 @@ def prepare_df(selected_currencies, start_date, end_date):
     df = pd.concat(df_from_each_file, ignore_index=True)
     return df
 
-
 @app.callback(
     Output('graph-with-data', 'figure'),
     Output('graph-percent-change', 'figure'),
     Output('graph-standard-score', 'figure'),
     Output('graph-rolling-percent-change', 'figure'),
     Output('graph-sharpe-score', 'figure'),
+    Output('graph-corr', 'figure'),
     Input('selected-currencies', 'value'),
     Input('date-picker-range', 'start_date'),
     Input('date-picker-range', 'end_date'))
@@ -162,7 +162,15 @@ def update_figure(selected_currencies, start_date, end_date):
     fig5 = px.line(filtered_df, x="date", y="sharpe_score", color="symbol")
     fig5.update_layout(transition_duration=500)
 
-    return fig1, fig2, fig3, fig4, fig5
+    if start_date:
+        df_corr_filtered = df_correlation[df_correlation.date >= start_date]
+    if end_date:
+        df_corr_filtered = df_correlation[df_correlation.date < end_date]
+
+    matrix = df_corr_filtered.drop(['date'], axis=1).corr().round(2)
+    fig_corr = px.imshow(matrix, text_auto=True, aspect="auto")
+
+    return fig1, fig2, fig3, fig4, fig5, fig_corr
 
 
 if __name__ == '__main__':
