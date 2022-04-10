@@ -18,13 +18,21 @@ server = app.server
 path = r'data/'
 all_files = glob.iglob(os.path.join(path, "*.csv"))
 
-df_from_each_file = (pd.read_csv(f, skiprows=1)[['unix', 'date', 'symbol', 'open']] for f in all_files)
+
+def pct_change(df):
+    df = df[::-1]
+    df['pct_change'] = df.open.pct_change()
+    return df
+
+
+df_from_each_file = (pct_change(pd.read_csv(f, skiprows=1)[['unix', 'date', 'symbol', 'open']]) for f in all_files)
 df = pd.concat(df_from_each_file, ignore_index=True)
 # df = df[df.unix >= START_TIMESTAMP]
 # df = df[df.unix < END_TIMESTAMP]
 
 
-fig = px.line(df, x="date", y="open", color="symbol")
+fig1 = px.line(df, x="date", y="open", color="symbol")
+fig2 = px.line(df, x="date", y="pct_change", color="symbol")
 
 app.layout = html.Div(children=[
     html.H1(children='Crypto Zigfrid'),
@@ -35,7 +43,12 @@ app.layout = html.Div(children=[
 
     dcc.Graph(
         id='graph-with-data',
-        figure=fig
+        figure=fig1
+    ),
+
+    dcc.Graph(
+        id='graph-percent-change',
+        figure=fig2
     ),
 
     dcc.Dropdown(
@@ -56,6 +69,7 @@ app.layout = html.Div(children=[
 
 @app.callback(
     Output('graph-with-data', 'figure'),
+    Output('graph-percent-change', 'figure'),
     Input('selected-currencies', 'value'),
     Input('date-picker-range', 'start_date'),
     Input('date-picker-range', 'end_date'))
@@ -71,7 +85,11 @@ def update_figure(selected_currencies, start_date, end_date):
 
     fig.update_layout(transition_duration=500)
 
-    return fig
+    fig2 = px.line(filtered_df, x="date", y="pct_change", color="symbol")
+
+    fig2.update_layout(transition_duration=500)
+
+    return fig, fig2
 
 
 if __name__ == '__main__':
